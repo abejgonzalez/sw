@@ -394,11 +394,12 @@ NvDlaError runTest(const TestAppArgs* appArgs, TestInfo* i)
     PROPAGATE_ERROR_FAIL(setupOutputBuffer(appArgs, i, &pOutputBuffer));
     NvDlaDebugPrintf("submitting tasks...\n");
     clock_gettime(CLOCK_MONOTONIC, &before);
+
     if (!runtime->submit())
         ORIGINATE_ERROR(NvDlaError_BadParameter, "runtime->submit() failed");
 
     clock_gettime(CLOCK_MONOTONIC, &after);
-    NvDlaDebugPrintf("execution time = %f s\n", get_elapsed_time(&before,&after));
+    NvDlaDebugPrintf("execution time = %f us\n", get_elapsed_time(&before,&after));
 
     PROPAGATE_ERROR_FAIL(DlaBuffer2DIMG(&pOutputBuffer, i->outputImage));
 

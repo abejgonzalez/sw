@@ -152,6 +152,10 @@ dla_pdp_enable(struct dla_processor_group *group)
 		goto exit;
 	}
 
+    dla_measure("STATS: (PDP,start,%d,%d,%ld)\n",
+            group->id,
+            group->op_desc->index,
+            rdcycle());
 	if (engine->stat_enable == (uint32_t)1) {
 		reg = FIELD_ENUM(PDP_D_PERF_ENABLE_0, DMA_EN, ENABLE);
 		pdp_reg_write(D_PERF_ENABLE, reg);

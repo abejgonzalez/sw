@@ -91,4 +91,12 @@ do {								\
 #define ASSERT_GOTO(_condition, _ret, _err_value, _goto) assert(condition)
 #endif /* DEBUG_ASSERT */
 
+// RISC-V cycle time
+#define read_csr(reg) ({ unsigned long __tmp; \
+                asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
+                __tmp; })
+
+#define rdtime() read_csr(time)
+#define rdcycle() read_csr(cycle)
+
 #endif

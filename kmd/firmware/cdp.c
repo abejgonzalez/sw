@@ -117,6 +117,10 @@ dla_cdp_enable(struct dla_processor_group *group)
 
 	dla_debug("Enter: %s\n", __func__);
 
+    dla_measure("STATS: (CDP,start,%d,%d,%ld)\n",
+            group->id,
+            group->op_desc->index,
+            rdcycle());
 	if (engine->stat_enable == (uint32_t)1) {
 		perf_reg = (map_perf_dma[1] <<
 				SHIFT(CDP_D_PERF_ENABLE_0, DMA_EN)) |

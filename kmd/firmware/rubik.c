@@ -106,6 +106,10 @@ dla_rubik_enable(struct dla_processor_group *group)
 
 	dla_trace("Enter: %s", __func__);
 
+    dla_measure("STATS: (RUBIK,start,%d,%d,%ld)\n",
+            group->id,
+            group->op_desc->index,
+            rdcycle());
 	if (engine->stat_enable == (uint32_t)1) {
 		rubik_reg_write(D_PERF_ENABLE, 1);
 		group->start_time = dla_get_time_us();

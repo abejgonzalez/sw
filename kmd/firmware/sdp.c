@@ -198,6 +198,10 @@ dla_sdp_enable(struct dla_processor_group *group)
 
 	dla_trace("Enter: %s", __func__);
 
+    dla_measure("STATS: (SDP,start,%d,%d,%ld)\n",
+            group->id,
+            group->op_desc->index,
+            rdcycle());
 	if (engine->stat_enable == (uint32_t)1) {
 		perf_reg = (map_perf_dma[1] <<
 			SHIFT(SDP_D_PERF_ENABLE_0, PERF_DMA_EN)) |

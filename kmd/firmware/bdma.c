@@ -94,6 +94,10 @@ dla_bdma_enable(struct dla_processor_group *group)
 		goto exit;
 	}
 
+    dla_measure("STATS: (BDMA,start,%d,%d,%ld)\n",
+            group->id,
+            group->op_desc->index,
+            rdcycle());
 	if (engine->stat_enable == (uint32_t)1) {
 		bdma_reg_write(CFG_STATUS, FIELD_ENUM(BDMA_CFG_STATUS_0,
 							STALL_COUNT_EN, YES));

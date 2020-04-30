@@ -292,6 +292,18 @@ void dla_warn(const char *str, ...);
 void dla_error(const char *str, ...);
 
 /**
+ * @brief			Print error message
+ *
+ * Implementation in portability layer, called by firmware
+ *
+ * Print error message to console
+ *
+ * @param str			Format string and variable arguments
+ *
+ */
+void dla_measure(const char *str, ...);
+
+/**
  * @brief			Fill memory region
  *
  * Implementation in portability layer, called by firmware

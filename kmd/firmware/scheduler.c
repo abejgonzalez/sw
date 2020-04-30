@@ -386,6 +386,12 @@ enable_op:
 	LOG_EVENT(group->roi_index, group->id, processor->op_type,
 						LOG_OPERATION_START);
 
+    // TODO: start measure
+    //dla_measure("STAT: Sched %s start: groupid(%d) opidx(%d) cyc(%ld)\n",
+    //        processor->name,
+    //        group->id,
+    //        group->op_desc->index,
+    //        rdcycle());
 	ret = processor->enable(group);
 	if (ret)
 		goto exit;
@@ -405,6 +411,10 @@ dla_submit_operation(struct dla_processor *processor,
 	uint32_t group_id = 0;
 
 	dla_debug("Enter: %s\n", __func__);
+
+	//dla_measure("Submit [%s]: %ld\n",
+	//        processor->name,
+	//        rdcycle());
 
 	dla_info("Prepare %s operation index %d ROI %d dep_count %d\n",
 			processor->name, op_desc->index, roi_index,
@@ -526,7 +536,7 @@ dla_update_dependency(struct dla_consumer *consumer,
 
 	if (op_desc->dependency_count == 0) {
 		processor = &engine->processors[op_desc->op_type];
-		dla_debug("enable %s in %s as depdency are resolved\n",
+		dla_debug("enable %s in %s as dependencies are resolved\n",
 			processor->name, __func__);
 
 		ret = dla_enable_operation(processor, op_desc);
@@ -611,6 +621,12 @@ dla_op_completion(struct dla_processor *processor,
 
 	op_desc = group->op_desc;
 
+    // TODO: Measure end time here based on the processor and the group
+    dla_measure("STATS: (%s,end,%d,%d,%ld)\n",
+            processor->name,
+            group->id,
+            group->op_desc->index,
+            rdcycle());
 #if STAT_ENABLE
 	if (engine->stat_enable == (uint32_t)1) {
 		processor->get_stat_data(processor, group);
@@ -674,6 +690,10 @@ dla_op_completion(struct dla_processor *processor,
 	dla_info("%d HWLs done, totally %d layers\n",
 				engine->num_proc_hwl,
 				engine->network->num_operations);
+
+	//dla_measure("Completed [%s] operation: %ld\n",
+	//        processor->name,
+	//        rdcycle());
 
 	/* free operation descriptor from cache */
 	dla_reset_group(group);
@@ -1067,6 +1087,7 @@ int
 dla_execute_task(void *engine_context, void *task_data, void *config_data)
 {
 	int32_t ret;
+	uint64_t start, end;
 	struct dla_engine *engine = (struct dla_engine *)engine_context;
 
 	if (engine == NULL) {
@@ -1092,13 +1113,17 @@ dla_execute_task(void *engine_context, void *task_data, void *config_data)
 	engine->config_data = config_data;
 	engine->network = &network;
 	engine->num_proc_hwl = 0;
-	engine->stat_enable = 0;
+	engine->stat_enable = 0; // TODO: Why is `stat_list_index` == -1
 
 	LOG_EVENT(0, 0, 0, LOG_TASK_START);
 
+    start = rdcycle();
 	ret = dla_read_network_config(engine);
 	if (ret)
 		goto complete;
+    end = rdcycle();
+
+    dla_measure("Read network: (%ld)\n", end - start);
 
 	dla_debug_address_info(engine->task);
 

@@ -223,6 +223,11 @@ dla_conv_enable(struct dla_processor_group *group)
 		reg = cdma_reg_read(S_CBUF_FLUSH_STATUS);
 	} while (!(reg & MASK(CDMA_S_CBUF_FLUSH_STATUS_0, FLUSH_DONE)));
 
+    // TODO: Measure start here
+    dla_measure("STATS: (CONV,start,%d,%d,%ld)\n",
+            group->id,
+            group->op_desc->index,
+            rdcycle());
 	if (engine->stat_enable == (uint32_t)1) {
 		cdma_reg_write(D_PERF_ENABLE, 1);
 		group->start_time = dla_get_time_us();

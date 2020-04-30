@@ -46,6 +46,14 @@
 
 #include "ErrorMacros.h"
 
+// RISC-V cycle time
+#define read_csr(reg) ({ unsigned long __tmp; \
+                asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
+                __tmp; })
+
+#define rdtime() read_csr(time)
+#define rdcycle() read_csr(cycle)
+
 using std::vector;
 using std::stringstream;
 using std::string;
@@ -587,7 +595,12 @@ bool Runtime::fillEMUTaskAddressList(Task *task, EMUTaskDescAccessor taskDescAcc
 bool Runtime::submit()
 {
     NvDlaError e = NvDlaSuccess;
+    uint64_t s_t, e_t;
+    s_t = rdcycle();
     e = submitInternal();
+    e_t = rdcycle();
+    // measure submit time
+    NvDlaDebugPrintf("STAT: Runtime cycles: %ld\n", e_t - s_t);
     return e == NvDlaSuccess;
 }
 
