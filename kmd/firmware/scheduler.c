@@ -86,7 +86,7 @@ dla_op_enabled(struct dla_processor_group *group)
 
 	/* update dependency graph for this task */
 	ret = dla_update_consumers(group, op_desc, DLA_EVENT_OP_ENABLED);
-	dla_debug("Exit: %s\n", __func__);
+	dla_debug("Exit : %s\n", __func__);
 
 	RETURN(ret);
 }
@@ -106,7 +106,7 @@ dla_op_programmed(struct dla_processor *processor,
 
 	/* update dependency graph for this task */
 	ret = dla_update_consumers(group, op_desc, DLA_EVENT_OP_PROGRAMMED);
-	dla_debug("Exit: %s\n", __func__);
+	dla_debug("Exit : %s\n", __func__);
 
 	RETURN(ret);
 }
@@ -171,7 +171,7 @@ dla_read_config(struct dla_task *task, struct dla_processor *processor,
 	processor->dump_config(group);
 
 exit:
-	dla_debug("Exit: %s\n", __func__);
+	dla_debug("Exit : %s\n", __func__);
 	RETURN(ret);
 }
 
@@ -211,11 +211,11 @@ dla_prepare_operation(struct dla_processor *processor,
 	 */
 	ret = utils_get_free_group(processor, &group_id, &rdma_id);
 	if (ret) {
-		dla_debug("processor:%s register groups are busy\n",
+		dla_debug("    <%s Unit>. All register groups are busy!\n",
 			processor->name);
 		goto exit;
 	} else {
-		dla_info("processor:%s group:%d, rdma_group:%d available\n",
+		dla_info("    <%s Unit>. RegGroup:%d RDMAGroup:%d available\n",
 				processor->name, group_id, rdma_id);
 	}
 	*group_number = group_id;
@@ -246,7 +246,7 @@ dla_prepare_operation(struct dla_processor *processor,
 
 	processor->tail_op = op_desc;
 exit:
-	dla_debug("Exit: %s status=%d\n", __func__, ret);
+	dla_debug("Exit : %s. Status:%d\n", __func__, ret);
 	RETURN(ret);
 }
 
@@ -261,7 +261,7 @@ dla_program_operation(struct dla_processor *processor,
 
 	dla_debug("Enter: %s\n", __func__);
 
-	dla_info("Program %s operation index %d ROI %d Group[%d]\n",
+	dla_info("    Program <%s Unit>. OpIdx:%d ROI:%d RegGroup:%d\n",
 					processor->name,
 					group->op_desc->index,
 					group->roi_index,
@@ -299,7 +299,7 @@ dla_program_operation(struct dla_processor *processor,
 
 	if (group->fused_parent != NULL) {
 		if (group->fused_parent->op_type != (op_desc->op_type - 1)) {
-			dla_warn("Invalid fused op type");
+			dla_warn("    Invalid fused op type");
 			ret = ERR(INVALID_INPUT);
 			goto exit;
 		}
@@ -311,7 +311,7 @@ dla_program_operation(struct dla_processor *processor,
 
 exit:
 	group->programming = 0;
-	dla_debug("Exit: %s status=%d\n", __func__, ret);
+	dla_debug("Exit : %s. Status:%d\n", __func__, ret);
 	RETURN(ret);
 }
 
@@ -357,8 +357,8 @@ dla_enable_operation(struct dla_processor *processor,
 	/**
 	 * Operation is not programmed yet, ignore
 	 */
-	dla_debug("exit %s without actual enable due to processor "
-				"hasn't been programmed\n", __func__);
+	dla_debug("    Exiting without actual enable since processor "
+				"is unprogrammed\n", __func__);
 	goto exit;
 
 enable_op:
@@ -371,12 +371,12 @@ enable_op:
 		goto exit;
 
 	if (group->active) {
-		dla_debug("Processor:%s already enabled on group:%d\n",
+		dla_debug("    <%s Unit> already enabled on RegGroup:%d\n",
 			processor->name, group_id);
 		goto exit;
 	}
 
-	dla_info("Enable %s operation index %d ROI %d\n",
+	dla_info("    Enable <%s Unit>. OpIdx:%d ROI:%d\n",
 					processor->name,
 					group->op_desc->index,
 					group->roi_index);
@@ -398,7 +398,7 @@ enable_op:
 
 	ret = dla_op_enabled(group);
 exit:
-	dla_debug("Exit: %s status=%d\n", __func__, ret);
+	dla_debug("Exit : %s. Status:%d\n", __func__, ret);
 	RETURN(ret);
 }
 
@@ -416,7 +416,7 @@ dla_submit_operation(struct dla_processor *processor,
 	//        processor->name,
 	//        rdcycle());
 
-	dla_info("Prepare %s operation index %d ROI %d dep_count %d\n",
+	dla_info("    Prepare <%s Unit>. OpIdx:%d ROI:%d OpDepCount:%d\n",
 			processor->name, op_desc->index, roi_index,
 			op_desc->dependency_count);
 	err = dla_prepare_operation(processor, op_desc, roi_index, &group_id);
@@ -434,7 +434,7 @@ dla_submit_operation(struct dla_processor *processor,
 		err = dla_enable_operation(processor, op_desc);
 
 exit:
-	dla_debug("Exit: %s\n", __func__);
+	dla_debug("Exit : %s\n", __func__);
 	RETURN(err);
 }
 
@@ -452,7 +452,7 @@ dla_dequeue_operation(struct dla_engine *engine,
 	dla_debug("Enter: %s\n", __func__);
 
 	if (engine->status) {
-		dla_debug("Skip dequeue op as engine has reported error\n");
+		dla_debug("    Skip dequeue op since engine reported an error\n");
 		goto exit;
 	}
 
@@ -468,7 +468,7 @@ dla_dequeue_operation(struct dla_engine *engine,
 			 * It means we are done processing
 			 * all ops of this type
 			 */
-			dla_debug("exit %s as there's no further operation\n",
+			dla_debug("    Exit : <%s Unit> exiting as there's no further operation\n",
 				processor->name);
 			goto exit;
 		}
@@ -478,7 +478,7 @@ dla_dequeue_operation(struct dla_engine *engine,
 		index = processor->tail_op->index;
 	}
 
-	dla_debug("Dequeue op from %s processor, index=%d ROI=%d\n",
+	dla_debug("    Dequeue op from <%s Unit>. Idx:%d ROI:%d\n",
 			processor->name, index, processor->roi_index);
 
 	/**
@@ -488,7 +488,7 @@ dla_dequeue_operation(struct dla_engine *engine,
 				processor->op_type, processor->roi_index);
 	if (consumer == NULL) {
 		ret = ERR(NO_MEM);
-		dla_error("Failed to allocate op_desc");
+		dla_error("    Failed to allocate op_desc");
 		goto exit;
 	}
 
@@ -496,7 +496,7 @@ dla_dequeue_operation(struct dla_engine *engine,
 	dla_put_op_desc(consumer);
 
 exit:
-	dla_debug("Exit: %s\n", __func__);
+	dla_debug("Exit : %s\n", __func__);
 	RETURN(ret);
 }
 
@@ -509,8 +509,14 @@ dla_update_dependency(struct dla_consumer *consumer,
 	struct dla_processor *processor;
 	struct dla_engine *engine = dla_get_engine();
 
-	if (consumer->index == -1)
+	//dla_debug("    DEBUG: ConsIdx:%d EvConsE:%dv%d\n",
+	//        consumer->index,
+	//        event,
+	//        consumer->event);
+
+	if (consumer->index == -1) {
 		goto exit;
+    }
 
 	/* Update dependency only if event matches */
 	if (event != consumer->event)
@@ -522,22 +528,22 @@ dla_update_dependency(struct dla_consumer *consumer,
 	 */
 	if (op_desc == NULL) {
 		ret = ERR(INVALID_INPUT);
-		dla_error("Operation descriptor is NULL, consumer index %d",
+		dla_error("    Operation descriptor is NULL. ConsumerIdx:%d",
 				consumer->index);
 		goto exit;
 	}
 
 	assert(op_desc->dependency_count > 0);
 
-	dla_debug("Update dependency operation index %d ROI %d DEP_COUNT=%d\n",
+	dla_debug("    Update dependency. OpIdx:%d ROI:%d OpDepCount:%d->%d\n",
 					op_desc->index, op_desc->roi_index,
-					op_desc->dependency_count);
+					op_desc->dependency_count, op_desc->dependency_count-1);
 	op_desc->dependency_count--;
 
 	if (op_desc->dependency_count == 0) {
 		processor = &engine->processors[op_desc->op_type];
-		dla_debug("enable %s in %s as dependencies are resolved\n",
-			processor->name, __func__);
+		dla_debug("    Enable <%s Unit> in %s since dependencies are resolved. OpIdx:%d\n",
+			processor->name, __func__, op_desc->index);
 
 		ret = dla_enable_operation(processor, op_desc);
 		if (ret)
@@ -557,17 +563,21 @@ dla_update_consumers(struct dla_processor_group *group,
 	struct dla_engine *engine = dla_get_engine();
 
 	if (engine->status) {
-		dla_debug("Skip update as engine has reported error\n");
+		dla_debug("    Skip update as engine has reported error\n");
 		goto exit;
 	}
+
+	dla_debug("Enter: %s. Updating consumers for OpIdx:%d\n",
+	        __func__,
+	        op->index);
 
 	for (i = 0; i < DLA_OP_NUM; i++) {
 		ret = dla_update_dependency(&op->consumers[i],
 						group->consumers[i],
 						event, group->roi_index);
 		if (ret) {
-			dla_error("Failed to update dependency for "
-				"consumer %d, ROI %d", i, group->roi_index);
+			dla_error("    Failed to update dependency for "
+				"Consumer:%d ROI:%d", i, group->roi_index);
 			goto exit;
 		}
 	}
@@ -576,12 +586,15 @@ dla_update_consumers(struct dla_processor_group *group,
 					group->fused_parent,
 					event, group->roi_index);
 	if (ret) {
-		dla_error("Failed to update dependency for "
-			"fused parent, ROI %d", group->roi_index);
+		dla_error("    Failed to update dependency for "
+			"fused parent. ROI:%d", group->roi_index);
 		goto exit;
 	}
 
 exit:
+	dla_debug("Exit : %s\n",
+	        __func__);
+
 	RETURN(ret);
 }
 
@@ -602,10 +615,10 @@ dla_op_completion(struct dla_processor *processor,
 	struct dla_processor_group *next_group;
 	struct dla_engine *engine = dla_get_engine();
 
-	dla_debug("Enter:%s processor %s group%u\n", __func__,
+	dla_debug("Enter: %s <%s Unit> RegGroup:%d\n", __func__,
 					processor->name, group->id);
 
-	dla_info("Completed %s operation index %d ROI %d\n",
+	dla_info("    Completed <%s Unit>. OpIdx:%d ROI:%d\n",
 					processor->name,
 					group->op_desc->index,
 					group->roi_index);
@@ -651,7 +664,7 @@ dla_op_completion(struct dla_processor *processor,
 					sizeof(union dla_stat_container),
 					0);
 		if (ret < 0)
-			dla_error("Failed to write stats to DMA memory\n");
+			dla_error("    Failed to write stats to DMA memory\n");
 	}
 #endif /* STAT_ENABLE */
 
@@ -687,7 +700,7 @@ dla_op_completion(struct dla_processor *processor,
 	if (ret)
 		goto exit;
 
-	dla_info("%d HWLs done, totally %d layers\n",
+	dla_info("    %d HWLs done. Totally completed %d layers\n",
 				engine->num_proc_hwl,
 				engine->network->num_operations);
 
@@ -732,7 +745,7 @@ dequeue_op:
 
 exit:
 	dla_put_op_desc(op_desc);
-	dla_debug("Exit:%s processor %s group%u status=%d\n",
+	dla_debug("Exit : %s <%s Unit> RegGroup:%d Status:%d\n",
 				__func__, processor->name,
 				group->id, ret);
 
@@ -755,14 +768,14 @@ dla_read_network_config(struct dla_engine *engine)
 	uint64_t network_addr;
 	struct dla_task *task = engine->task;
 
-	dla_debug("Enter:%s\n", __func__);
+	dla_debug("Enter: %s\n", __func__);
 
 	/**
 	 * Read address list from DRAM to DMEM
 	 */
 	ret = dla_read_address_list(engine);
 	if (ret) {
-		dla_error("Failed to read address list");
+		dla_error("    Failed to read address list");
 		goto exit;
 	}
 
@@ -774,7 +787,7 @@ dla_read_network_config(struct dla_engine *engine)
 						0, (void *)&network_addr,
 						DESTINATION_PROCESSOR);
 	if (ret) {
-		dla_error("Failed to read network desc address");
+		dla_error("    Failed to read network desc address");
 		goto exit;
 	}
 
@@ -787,7 +800,7 @@ dla_read_network_config(struct dla_engine *engine)
 				sizeof(struct dla_network_desc),
 				0);
 	if (ret) {
-		dla_error("Failed to read network descriptor");
+		dla_error("    Failed to read network descriptor");
 		goto exit;
 	}
 
@@ -804,7 +817,7 @@ dla_read_network_config(struct dla_engine *engine)
 				(void *)&task->operation_desc_addr,
 				DESTINATION_PROCESSOR);
 	if (ret) {
-		dla_error("Failed to read operation desc list address");
+		dla_error("    Failed to read operation desc list address");
 		goto exit;
 	}
 
@@ -816,7 +829,7 @@ dla_read_network_config(struct dla_engine *engine)
 				(void *)&task->surface_desc_addr,
 				DESTINATION_PROCESSOR);
 	if (ret) {
-		dla_error("Failed to read surface desc list address");
+		dla_error("    Failed to read surface desc list address");
 		goto exit;
 	}
 
@@ -828,7 +841,7 @@ dla_read_network_config(struct dla_engine *engine)
 				(void *)&task->dependency_graph_addr,
 				DESTINATION_PROCESSOR);
 	if (ret) {
-		dla_error("Failed to ready dependency graph address");
+		dla_error("    Failed to ready dependency graph address");
 		goto exit;
 	}
 
@@ -842,7 +855,7 @@ dla_read_network_config(struct dla_engine *engine)
 					(void *)&task->lut_data_addr,
 					DESTINATION_PROCESSOR);
 		if (ret) {
-			dla_error("Failed to read LUT list address");
+			dla_error("    Failed to read LUT list address");
 			goto exit;
 		}
 	}
@@ -860,7 +873,7 @@ dla_read_network_config(struct dla_engine *engine)
 					(void *)&task->roi_array_addr,
 					DESTINATION_PROCESSOR);
 		if (ret) {
-			dla_error("Failed to read ROI array address");
+			dla_error("    Failed to read ROI array address");
 			goto exit;
 		}
 
@@ -870,7 +883,7 @@ dla_read_network_config(struct dla_engine *engine)
 					sizeof(uint64_t),
 					0);
 		if (ret) {
-			dla_error("Failed to read ROI array length");
+			dla_error("    Failed to read ROI array length");
 			goto exit;
 		}
 
@@ -879,7 +892,7 @@ dla_read_network_config(struct dla_engine *engine)
 		 * ROIs this network can process
 		 */
 		if (roi_array_length > network.num_rois) {
-			dla_error("Invalid number of ROIs detected");
+			dla_error("    Invalid number of ROIs detected");
 			ret = ERR(INVALID_INPUT);
 			goto exit;
 		}
@@ -895,7 +908,7 @@ dla_read_network_config(struct dla_engine *engine)
 						(void *)&task->surface_addr,
 						DESTINATION_DMA);
 		if (ret) {
-			dla_error("Failed to read surface address");
+			dla_error("    Failed to read surface address");
 			goto exit;
 		}
 	}
@@ -908,14 +921,14 @@ dla_read_network_config(struct dla_engine *engine)
 						(void *)&task->stat_data_addr,
 						DESTINATION_PROCESSOR);
 		if (ret) {
-			dla_error("Failed to read stat address");
+			dla_error("    Failed to read stat address");
 			goto exit;
 		}
 	}
 #endif /* STAT_ENABLE */
 
 exit:
-	dla_debug("Exit:%s status=%d\n", __func__, ret);
+	dla_debug("Exit : %s Status:%d\n", __func__, ret);
 	RETURN(ret);
 }
 
@@ -942,7 +955,7 @@ dla_initiate_processors(struct dla_engine *engine)
 	for (i = 0; i < DLA_OP_NUM; i++) {
 		if (nw->op_head[i] >= nw->num_operations) {
 			ret = ERR(INVALID_INPUT);
-			dla_error("Invalid op_head %d for op %d",
+			dla_error("    Invalid op_head:%d for op:%d",
 						nw->op_head[i], i);
 			goto exit;
 		}
@@ -961,7 +974,7 @@ dla_initiate_processors(struct dla_engine *engine)
 		 * or cache insufficient - we should fix it
 		 **/
 		if (consumer == NULL) {
-			dla_error("Failed to allocate memory for op_head[%d]=%d",
+			dla_error("    Failed to allocate memory for op_head[%d]:%d",
 							i, index);
 			ret = ERR(NO_MEM);
 			goto exit;
@@ -972,20 +985,20 @@ dla_initiate_processors(struct dla_engine *engine)
 		ret = dla_submit_operation(processor, consumer, 0);
 		dla_put_op_desc(consumer);
 		if (ret && ret != ERR(PROCESSOR_BUSY)) {
-			dla_error("Failed to submit %s op from index %u\n",
+			dla_error("    Failed to submit <%s Unit> from index:%d\n",
 						processor->name, index);
 			goto exit;
 		}
 
 		ret = dla_dequeue_operation(engine, processor);
 		if (ret) {
-			dla_error("Failed to dequeue op for %s processor",
+			dla_error("    Failed to dequeue op for <%s Unit>",
 							processor->name);
 			goto exit;
 		}
 	}
 exit:
-	dla_debug("Exit: %s status=%d\n", __func__, ret);
+	dla_debug("Exit : %s Status:%d\n", __func__, ret);
 	RETURN(ret);
 }
 
@@ -997,7 +1010,7 @@ dla_handle_events(struct dla_processor *processor)
 	uint8_t group_id;
 	struct dla_processor_group *group;
 
-	dla_debug("Enter:%s, processor:%s\n", __func__, processor->name);
+	dla_debug("Enter: %s. <%s Unit>\n", __func__, processor->name);
 
 	group_id = !processor->last_group;
 
@@ -1005,8 +1018,8 @@ dla_handle_events(struct dla_processor *processor)
 		group = &processor->groups[group_id];
 
 		if ((1 << DLA_EVENT_CDMA_WT_DONE) & group->events) {
-			dla_info("Handle cdma weight done event, processor %s "
-				"group %u\n", processor->name, group->id);
+			dla_info("    Handle cdma weight done event. <%s Unit> "
+				"RegGroup:%d\n", processor->name, group->id);
 
 			ret = dla_update_consumers(group,
 						   group->op_desc,
@@ -1016,8 +1029,8 @@ dla_handle_events(struct dla_processor *processor)
 		}
 
 		if ((1 << DLA_EVENT_CDMA_DT_DONE) & group->events) {
-			dla_info("Handle cdma data done event, processor %s "
-				"group %u\n", processor->name, group->id);
+			dla_info("    Handle cdma data done event. <%s Unit> "
+				"RegGroup:%d\n", processor->name, group->id);
 
 			ret = dla_update_consumers(group,
 						   group->op_desc,
@@ -1030,8 +1043,8 @@ dla_handle_events(struct dla_processor *processor)
 		 * Handle complete after all other events
 		 */
 		if ((1 << DLA_EVENT_OP_COMPLETED) & group->events) {
-			dla_info("Handle op complete event, processor %s "
-				"group %u\n", processor->name, group->id);
+			dla_info("    Handle op complete event. <%s Unit> "
+				"RegGroup:%d\n", processor->name, group->id);
 
 			ret = dla_op_completion(processor, group);
 			if (ret)
@@ -1045,7 +1058,7 @@ dla_handle_events(struct dla_processor *processor)
 		group_id = !group_id;
 	}
 exit:
-	dla_debug("Exit:%s, ret:%x\n", __func__, ret);
+	dla_debug("Exit : %s. Status:%d\n", __func__, ret);
 	RETURN(ret);
 }
 
@@ -1091,13 +1104,13 @@ dla_execute_task(void *engine_context, void *task_data, void *config_data)
 	struct dla_engine *engine = (struct dla_engine *)engine_context;
 
 	if (engine == NULL) {
-		dla_error("engine is NULL\n");
+		dla_error("Engine is NULL\n");
 		ret = ERR(INVALID_INPUT);
 		goto complete;
 	}
 
 	if (engine->task == NULL) {
-		dla_error("task is NULL\n");
+		dla_error("Task is NULL\n");
 		ret = ERR(INVALID_INPUT);
 		goto complete;
 	}
@@ -1181,5 +1194,5 @@ dla_clear_task(void *engine_context)
 	engine->status = 0;
 	engine->stat_enable = 0;
 
-	dla_info("reset engine done\n");
+	dla_info("Reset engine done\n");
 }

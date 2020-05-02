@@ -271,12 +271,12 @@ validate_data_cube(struct dla_data_cube src_data_cube,
 {
 	int32_t ret = 0;
 
-	dla_trace("Enter: %s", __func__);
+	dla_debug("Enter: %s", __func__);
 
 	if ((src_data_cube.width > DCUBE_MAX_WIDTH) ||
 	    (src_data_cube.height > DCUBE_MAX_HEIGHT) ||
 	    (src_data_cube.channel > DCUBE_MAX_CHANNEL)) {
-		dla_error("Invalid SrcInput Cube[W: %u, H: %u, C: %u]",
+		dla_error("    Invalid SrcInput Cube[W: %u, H: %u, C: %u]",
 				src_data_cube.width, src_data_cube.height,
 				src_data_cube.channel);
 		ret = ERR(INVALID_INPUT);
@@ -286,7 +286,7 @@ validate_data_cube(struct dla_data_cube src_data_cube,
 	if ((dst_data_cube.width > DCUBE_MAX_WIDTH) ||
 	    (dst_data_cube.height > DCUBE_MAX_HEIGHT) ||
 	    (dst_data_cube.channel > DCUBE_MAX_CHANNEL)) {
-		dla_error("Invalid DstInput Cube[W: %u, H: %u, C: %u]",
+		dla_error("    Invalid DstInput Cube[W: %u, H: %u, C: %u]",
 				dst_data_cube.width, dst_data_cube.height,
 				dst_data_cube.channel);
 		ret = ERR(INVALID_INPUT);
@@ -294,19 +294,19 @@ validate_data_cube(struct dla_data_cube src_data_cube,
 	}
 
 	if (src_data_cube.type > mem_type) {
-		dla_error("Invalid src_data.mem_type: %u\n", src_data_cube.type);
+		dla_error("    Invalid src_data.mem_type: %u\n", src_data_cube.type);
 		ret = ERR(INVALID_INPUT);
 		goto exit;
 	}
 
 	if (dst_data_cube.type > mem_type) {
-		dla_error("Invalid dst_data.mem_type: %u\n", dst_data_cube.type);
+		dla_error("    Invalid dst_data.mem_type: %u\n", dst_data_cube.type);
 		ret = ERR(INVALID_INPUT);
 		goto exit;
 	}
 
 exit:
-	dla_trace("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 	RETURN(ret);
 }
 
@@ -316,7 +316,7 @@ validate_precision(uint8_t precision, uint8_t map_precision)
 	int32_t ret = 0;
 
 	if (precision >= map_precision) {
-		dla_error("Invalid precision: %u\n", precision);
+		dla_error("    Invalid precision: %u\n", precision);
 		ret = ERR(INVALID_INPUT);
 	}
 

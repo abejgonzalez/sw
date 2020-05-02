@@ -139,7 +139,7 @@ dla_cdp_enable(struct dla_processor_group *group)
 	reg = FIELD_ENUM(CDP_D_OP_ENABLE_0, OP_EN, ENABLE);
 	cdp_reg_write(D_OP_ENABLE, reg);
 
-	dla_debug("Exit: %s\n", __func__);
+	dla_debug("Exit : %s\n", __func__);
 
 	RETURN(0);
 }
@@ -169,18 +169,18 @@ processor_cdp_program(struct dla_processor_group *group)
 
 	/* Argument check */
 	if (cdp_surface->src_data.type == DLA_MEM_HW) {
-		dla_error("Invalid source memory type\n");
+		dla_error("    Invalid source memory type\n");
 		ret = ERR(INVALID_INPUT);
 		goto exit;
 	}
 	if (cdp_surface->dst_data.type == DLA_MEM_HW) {
-		dla_error("Invalid destination memory type\n");
+		dla_error("    Invalid destination memory type\n");
 		ret = ERR(INVALID_INPUT);
 		goto exit;
 	}
 
 	if (cdp_op->in_precision != cdp_op->out_precision) {
-		dla_error("CDP does not support precision conversion\n");
+		dla_error("    CDP does not support precision conversion\n");
 		ret = ERR(INVALID_INPUT);
 		goto exit;
 	}
@@ -296,7 +296,7 @@ processor_cdp_program(struct dla_processor_group *group)
 	cdp_reg_write(D_FUNC_BYPASS, reg);
 
 exit:
-	dla_debug("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 	RETURN(ret);
 }
 
@@ -383,6 +383,6 @@ dla_cdp_program(struct dla_processor_group *group)
 		goto exit;
 
 exit:
-	dla_debug("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 	RETURN(ret);
 }

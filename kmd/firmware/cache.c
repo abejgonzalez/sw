@@ -73,7 +73,7 @@ dla_get_op_desc(struct dla_task *task, int16_t index,
 	struct dla_engine *engine = dla_get_engine();
 
 	if (index == -1) {
-		dla_debug("no desc get due to index==-1\n");
+		dla_debug("    No desc get due to Idx:-1\n");
 		goto exit;
 	}
 
@@ -85,7 +85,7 @@ dla_get_op_desc(struct dla_task *task, int16_t index,
 	for (i = 0; i < DLA_OP_CACHE_SIZE; i++, desc++) {
 		if (desc->index == index && desc->roi_index == roi_index) {
 			if (desc->op_type != op_type) {
-				dla_error("op_cache[op=%u] contains incorrect "
+				dla_error("    op_cache[op=%u] contains incorrect "
 						"entry of op[%u]\n", op_type,
 						desc->op_type);
 				continue;
@@ -120,7 +120,7 @@ dla_get_op_desc(struct dla_task *task, int16_t index,
 				 * mismatches, then wrong entry is fetched, so
 				 * report this issue by throwing error.
 				 */
-				dla_error("Fetched [op_type=%u] from DRAM doesn't "
+				dla_error("    Fetched [op_type=%u] from DRAM doesn't "
 					"match with op_type[%u]\n",
 					desc->op_type,
 					op_type);
@@ -157,7 +157,7 @@ dla_free_op_desc(struct dla_common_op_desc *op_desc)
 	struct dla_task *task;
 	struct dla_engine *engine = dla_get_engine();
 
-	dla_debug("Enter: %s op desc index %u ROI %d\n", __func__,
+	dla_debug("Enter: %s. OpIdx:%d ROI:%d\n", __func__,
 				op_desc->index, op_desc->roi_index);
 
 	task = engine->task;
@@ -195,7 +195,7 @@ dla_free_op_desc(struct dla_common_op_desc *op_desc)
 	op_desc->index = -1;
 	op_desc->roi_index = -1;
 exit:
-	dla_debug("Exit: %s\n", __func__);
+	dla_debug("Exit : %s\n", __func__);
 }
 
 void

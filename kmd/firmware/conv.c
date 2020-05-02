@@ -217,7 +217,7 @@ dla_conv_enable(struct dla_processor_group *group)
 	uint32_t reg;
 	struct dla_engine *engine = dla_get_engine();
 
-	dla_trace("Enter: %s", __func__);
+	dla_debug("Enter: %s", __func__);
 
 	do {
 		reg = cdma_reg_read(S_CBUF_FLUSH_STATUS);
@@ -241,7 +241,7 @@ dla_conv_enable(struct dla_processor_group *group)
 	csc_reg_write(D_OP_ENABLE, reg);
 	cdma_reg_write(D_OP_ENABLE, reg);
 
-	dla_trace("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 
 	RETURN(0);
 }
@@ -269,7 +269,7 @@ processor_conv_program(struct dla_processor_group *group)
 	struct dla_conv_op_desc *conv_op;
 	struct dla_conv_surface_desc *conv_surface;
 
-	dla_trace("Enter: %s", __func__);
+	dla_debug("Enter: %s", __func__);
 
 	weight_compress_support = engine->config_data->weight_compress_support;
 	atom_size = engine->config_data->atom_size;
@@ -743,7 +743,7 @@ processor_conv_program(struct dla_processor_group *group)
 	cdma_reg_write(D_BANK, reg);
 
 exit:
-	dla_trace("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 	RETURN(ret);
 }
 
@@ -772,13 +772,13 @@ dla_conv_program(struct dla_processor_group *group)
 {
 	int32_t ret;
 
-	dla_trace("Enter: %s", __func__);
+	dla_debug("Enter: %s", __func__);
 
 	ret = processor_conv_program(group);
 	if (ret)
 		goto exit;
 
 exit:
-	dla_trace("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 	RETURN(ret);
 }

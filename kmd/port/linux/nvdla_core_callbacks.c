@@ -80,34 +80,34 @@ static struct nvdla_config nvdla_config_large = {
 
 void dla_debug(const char *str, ...)
 {
-	//va_list args;
-	//va_start(args, str);
-	//vprintk(pr_fmt(str), args);
-	//va_end(args);
+	va_list args;
+	va_start(args, str);
+	vprintk(pr_fmt(str), args);
+	va_end(args);
 }
 
 void dla_info(const char *str, ...)
 {
-	//va_list args;
-	//va_start(args, str);
-	//vprintk(str, args);
-	//va_end(args);
+	va_list args;
+	va_start(args, str);
+	vprintk(str, args);
+	va_end(args);
 }
 
 void dla_warn(const char *str, ...)
 {
-	//va_list args;
-	//va_start(args, str);
-	//vprintk(str, args);
-	//va_end(args);
+	va_list args;
+	va_start(args, str);
+	vprintk(str, args);
+	va_end(args);
 }
 
 void dla_error(const char *str, ...)
 {
-	//va_list args;
-	//va_start(args, str);
-	//vprintk(str, args);
-	//va_end(args);
+	va_list args;
+	va_start(args, str);
+	vprintk(str, args);
+	va_end(args);
 }
 
 void dla_measure(const char *str, ...)

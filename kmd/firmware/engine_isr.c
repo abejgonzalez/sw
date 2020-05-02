@@ -44,7 +44,7 @@ int32_t dla_isr_handler(void *engine_data)
 	mask = glb_reg_read(S_INTR_MASK);
 	reg = glb_reg_read(S_INTR_STATUS);
 
-	dla_trace("Enter: dla_isr_handler, reg:%x, mask:%x\n", reg, mask);
+	dla_debug("Enter: %s. Reg:%x Mask:%x\n", __func__, reg, mask);
 	if (reg & MASK(GLB_S_INTR_STATUS_0, CACC_DONE_STATUS0)) {
 		processor = &engine->processors[DLA_OP_CONV];
 		group = &processor->groups[0];
@@ -131,6 +131,6 @@ int32_t dla_isr_handler(void *engine_data)
 	mask = glb_reg_read(S_INTR_MASK);
 	reg = glb_reg_read(S_INTR_STATUS);
 
-	dla_trace("Exit: dla_isr_handler, reg:%x, mask:%x\n", reg, mask);
+	dla_debug("Exit : %s. Reg:%x Mask:%x\n", __func__, reg, mask);
 	RETURN(0);
 }

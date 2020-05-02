@@ -196,7 +196,7 @@ dla_sdp_enable(struct dla_processor_group *group)
 	uint8_t perf_reg;
 	struct dla_engine *engine = dla_get_engine();
 
-	dla_trace("Enter: %s", __func__);
+	dla_debug("Enter: %s", __func__);
 
     dla_measure("STATS: (SDP,start,%d,%d,%ld)\n",
             group->id,
@@ -226,7 +226,7 @@ dla_sdp_enable(struct dla_processor_group *group)
 	reg = FIELD_ENUM(SDP_D_OP_ENABLE_0, OP_EN, ENABLE);
 	sdp_reg_write(D_OP_ENABLE, reg);
 
-	dla_trace("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 
 	RETURN(0);
 }
@@ -279,7 +279,7 @@ processor_sdp_program(struct dla_processor_group *group)
 	struct dla_sdp_op_desc *sdp_op;
 	struct dla_sdp_surface_desc *sdp_surface;
 
-	dla_trace("Enter: %s", __func__);
+	dla_debug("Enter: %s", __func__);
 	atom_size = engine->config_data->atom_size;
 
 	sdp_op = &group->operation_desc->sdp_op;
@@ -730,7 +730,7 @@ processor_sdp_program(struct dla_processor_group *group)
 	sdp_reg_write(D_CVT_SHIFT, sdp_op->out_cvt.truncate);
 
 exit:
-	dla_trace("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 	RETURN(ret);
 }
 
@@ -807,7 +807,7 @@ dla_sdp_program(struct dla_processor_group *group)
 {
 	int32_t ret;
 
-	dla_trace("Enter: %s", __func__);
+	dla_debug("Enter: %s", __func__);
 	dla_enable_intr(MASK(GLB_S_INTR_MASK_0, SDP_DONE_MASK1) |
 			MASK(GLB_S_INTR_MASK_0, SDP_DONE_MASK0));
 
@@ -816,6 +816,6 @@ dla_sdp_program(struct dla_processor_group *group)
 		goto exit;
 
 exit:
-	dla_trace("Exit: %s", __func__);
+	dla_debug("Exit : %s", __func__);
 	RETURN(ret);
 }
