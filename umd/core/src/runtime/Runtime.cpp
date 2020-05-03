@@ -600,7 +600,7 @@ bool Runtime::submit()
     e = submitInternal();
     e_t = rdcycle();
     // measure submit time
-    NvDlaDebugPrintf("STAT: Runtime cycles: %ld\n", e_t - s_t);
+    NvDlaDebugPrintf("STAT: Runtime cycles: %lu\n", e_t - s_t);
     return e == NvDlaSuccess;
 }
 
