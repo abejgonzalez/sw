@@ -150,19 +150,32 @@ void
 dla_sdp_stat_data(struct dla_processor *processor,
 					struct dla_processor_group *group)
 {
-	uint64_t end_time = 0;
-	struct dla_sdp_stat_desc *sdp_stat;
+    uint64_t write_stall;
+	write_stall = sdp_reg_read(D_PERF_WDMA_WRITE_STALL);
 
-	sdp_stat = &processor->stat_data_desc->sdp_stat;
-
-	end_time = dla_get_time_us();
-
-	sdp_stat->nan_input_num = sdp_reg_read(D_STATUS_NAN_INPUT_NUM);
-	sdp_stat->inf_input_num = sdp_reg_read(D_STATUS_INF_INPUT_NUM);
-	sdp_stat->nan_output_num = sdp_reg_read(D_STATUS_NAN_OUTPUT_NUM);
-	sdp_stat->wdma_write_stall = sdp_reg_read(D_PERF_WDMA_WRITE_STALL);
-	sdp_stat->runtime = (uint32_t)(end_time - group->start_time);
+    dla_perf_measure("STATS: (%s,%d,%ld)\n",
+        processor->name,
+        group->op_desc->index,
+        write_stall);
 }
+
+//void
+//dla_sdp_stat_data(struct dla_processor *processor,
+//					struct dla_processor_group *group)
+//{
+//	uint64_t end_time = 0;
+//	struct dla_sdp_stat_desc *sdp_stat;
+//
+//	sdp_stat = &processor->stat_data_desc->sdp_stat;
+//
+//	end_time = dla_get_time_us();
+//
+//	sdp_stat->nan_input_num = sdp_reg_read(D_STATUS_NAN_INPUT_NUM);
+//	sdp_stat->inf_input_num = sdp_reg_read(D_STATUS_INF_INPUT_NUM);
+//	sdp_stat->nan_output_num = sdp_reg_read(D_STATUS_NAN_OUTPUT_NUM);
+//	sdp_stat->wdma_write_stall = sdp_reg_read(D_PERF_WDMA_WRITE_STALL);
+//	sdp_stat->runtime = (uint32_t)(end_time - group->start_time);
+//}
 
 void
 dla_sdp_dump_stat(struct dla_processor *processor)
@@ -202,6 +215,16 @@ dla_sdp_enable(struct dla_processor_group *group)
             group->id,
             group->op_desc->index,
             rdcycle());
+    perf_reg = (map_perf_dma[1] <<
+			SHIFT(SDP_D_PERF_ENABLE_0, PERF_DMA_EN)) |
+			(map_perf_lut[1] <<
+			SHIFT(SDP_D_PERF_ENABLE_0, PERF_LUT_EN)) |
+			(map_perf_sat[1] <<
+			SHIFT(SDP_D_PERF_ENABLE_0, PERF_SAT_EN)) |
+			(map_perf_nan_inf[1] <<
+			SHIFT(SDP_D_PERF_ENABLE_0, PERF_NAN_INF_COUNT_EN));
+	sdp_reg_write(D_PERF_ENABLE, perf_reg);
+
 	if (engine->stat_enable == (uint32_t)1) {
 		perf_reg = (map_perf_dma[1] <<
 			SHIFT(SDP_D_PERF_ENABLE_0, PERF_DMA_EN)) |

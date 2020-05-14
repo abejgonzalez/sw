@@ -92,7 +92,7 @@ do {								\
 #endif /* DEBUG_ASSERT */
 
 // RISC-V cycle time
-#define read_csr(reg) ({ unsigned long __tmp; \
+#define read_csr(reg) ({ uint64_t __tmp; \
                 asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
                 __tmp; })
 

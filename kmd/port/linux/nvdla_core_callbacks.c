@@ -56,8 +56,18 @@
 #include <nvdla_linux.h>
 #include <nvdla_ioctl.h>
 
-#define ONLY_MEASURE
-//#define ENABLE_MEASURE
+// RISC-V cycle time
+#define read_csr(reg) ({ unsigned long __tmp; \
+           asm volatile ("csrr %0, " #reg : "=r"(__tmp)); \
+           __tmp; })
+
+#define rdtime() read_csr(time)
+#define rdcycle() read_csr(cycle)
+
+//#define ENABLE_VERBOSE
+#define ENABLE_MEASURE
+//#define ENABLE_PERF_MEASURE
+#define ENABLE_PERF1_MEASURE
 
 static struct nvdla_config nvdla_config_os_initial = {
 	.atom_size = 32,
@@ -83,7 +93,7 @@ static struct nvdla_config nvdla_config_large = {
 
 void dla_debug(const char *str, ...)
 {
-#ifndef ONLY_MEASURE
+#ifdef ENABLE_VERBOSE
 	va_list args;
 	va_start(args, str);
 	vprintk(pr_fmt(str), args);
@@ -93,7 +103,7 @@ void dla_debug(const char *str, ...)
 
 void dla_info(const char *str, ...)
 {
-#ifndef ONLY_MEASURE
+#ifdef ENABLE_VERBOSE
 	va_list args;
 	va_start(args, str);
 	vprintk(str, args);
@@ -103,7 +113,7 @@ void dla_info(const char *str, ...)
 
 void dla_warn(const char *str, ...)
 {
-#ifndef ONLY_MEASURE
+#ifdef ENABLE_VERBOSE
 	va_list args;
 	va_start(args, str);
 	vprintk(str, args);
@@ -113,7 +123,7 @@ void dla_warn(const char *str, ...)
 
 void dla_error(const char *str, ...)
 {
-#ifndef ONLY_MEASURE
+#ifdef ENABLE_VERBOSE
 	va_list args;
 	va_start(args, str);
 	vprintk(str, args);
@@ -124,6 +134,26 @@ void dla_error(const char *str, ...)
 void dla_measure(const char *str, ...)
 {
 #ifdef ENABLE_MEASURE
+	va_list args;
+	va_start(args, str);
+	vprintk(str, args);
+	va_end(args);
+#endif
+}
+
+void dla_perf_measure(const char *str, ...)
+{
+#ifdef ENABLE_PERF_MEASURE
+	va_list args;
+	va_start(args, str);
+	vprintk(str, args);
+	va_end(args);
+#endif
+}
+
+void dla_perf1_measure(const char *str, ...)
+{
+#ifdef ENABLE_PERF1_MEASURE
 	va_list args;
 	va_start(args, str);
 	vprintk(str, args);
@@ -332,14 +362,18 @@ int32_t nvdla_task_submit(struct nvdla_device *nvdla_dev, struct nvdla_task *tas
 {
 	int32_t err = 0;
 	uint32_t task_complete = 0;
+	uint64_t before_exec, after_exec, after_clear;
 
 	nvdla_dev->task = task;
 
+    before_exec = rdcycle();
 	err = dla_execute_task(nvdla_dev->engine_context, (void *)task, nvdla_dev->config_data);
 	if (err) {
 		pr_err("Task execution failed\n");
 		return err;
 	}
+    after_exec = rdcycle();
+    dla_perf1_measure("STATS: Exec %ld, %ld\n", before_exec, after_exec);
 
 	pr_debug("Wait for task complete\n");
 
@@ -360,6 +394,8 @@ int32_t nvdla_task_submit(struct nvdla_device *nvdla_dev, struct nvdla_task *tas
 
 	pr_debug("Task complete\n");
 	dla_clear_task(nvdla_dev->engine_context);
+	after_clear = rdcycle();
+    dla_perf1_measure("STATS: Clear %ld\n", after_clear);
 
 	return err;
 }

@@ -44,22 +44,44 @@ void
 dla_bdma_stat_data(struct dla_processor *processor,
 					struct dla_processor_group *group)
 {
-	uint64_t end_time = 0;
-	struct dla_bdma_stat_desc *bdma_stat;
+    uint64_t read_stall, write_stall;
 
-	bdma_stat = &processor->stat_data_desc->bdma_stat;
-
-	end_time = dla_get_time_us();
-
-	if (group->id == (uint32_t)0) {
-		bdma_stat->read_stall = bdma_reg_read(STATUS_GRP0_READ_STALL);
-		bdma_stat->write_stall = bdma_reg_read(STATUS_GRP0_WRITE_STALL);
+    if (group->id == (uint32_t)0) {
+		read_stall = bdma_reg_read(STATUS_GRP0_READ_STALL);
+		write_stall = bdma_reg_read(STATUS_GRP0_WRITE_STALL);
 	} else {
-		bdma_stat->read_stall = bdma_reg_read(STATUS_GRP1_READ_STALL);
-		bdma_stat->write_stall = bdma_reg_read(STATUS_GRP1_WRITE_STALL);
+		read_stall = bdma_reg_read(STATUS_GRP1_READ_STALL);
+		write_stall = bdma_reg_read(STATUS_GRP1_WRITE_STALL);
 	}
-	bdma_stat->runtime = (uint32_t)(end_time - group->start_time);
+
+    dla_perf_measure("STATS: (%s,%d,%d,%ld,%ld)\n",
+        processor->name,
+        group->id,
+        group->op_desc->index,
+        read_stall,
+        write_stall);
 }
+
+//void
+//dla_bdma_stat_data(struct dla_processor *processor,
+//					struct dla_processor_group *group)
+//{
+//	uint64_t end_time = 0;
+//	struct dla_bdma_stat_desc *bdma_stat;
+//
+//	bdma_stat = &processor->stat_data_desc->bdma_stat;
+//
+//	end_time = dla_get_time_us();
+//
+//	if (group->id == (uint32_t)0) {
+//		bdma_stat->read_stall = bdma_reg_read(STATUS_GRP0_READ_STALL);
+//		bdma_stat->write_stall = bdma_reg_read(STATUS_GRP0_WRITE_STALL);
+//	} else {
+//		bdma_stat->read_stall = bdma_reg_read(STATUS_GRP1_READ_STALL);
+//		bdma_stat->write_stall = bdma_reg_read(STATUS_GRP1_WRITE_STALL);
+//	}
+//	bdma_stat->runtime = (uint32_t)(end_time - group->start_time);
+//}
 
 void
 dla_bdma_dump_stat(struct dla_processor *processor)
@@ -98,6 +120,9 @@ dla_bdma_enable(struct dla_processor_group *group)
             group->id,
             group->op_desc->index,
             rdcycle());
+	bdma_reg_write(CFG_STATUS, FIELD_ENUM(BDMA_CFG_STATUS_0,
+							STALL_COUNT_EN, YES));
+
 	if (engine->stat_enable == (uint32_t)1) {
 		bdma_reg_write(CFG_STATUS, FIELD_ENUM(BDMA_CFG_STATUS_0,
 							STALL_COUNT_EN, YES));

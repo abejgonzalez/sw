@@ -61,21 +61,34 @@ void
 dla_cdp_stat_data(struct dla_processor *processor,
 					struct dla_processor_group *group)
 {
-	uint64_t end_time = 0;
-	struct dla_cdp_stat_desc *cdp_stat;
+	uint64_t write_stall;
 
-	cdp_stat = &processor->stat_data_desc->cdp_stat;
-
-	end_time = dla_get_time_us();
-
-	cdp_stat->write_stall = cdp_reg_read(D_PERF_WRITE_STALL);
-	cdp_stat->lut_uflow = cdp_reg_read(D_PERF_LUT_UFLOW);
-	cdp_stat->lut_oflow = cdp_reg_read(D_PERF_LUT_OFLOW);
-	cdp_stat->lut_hybrid = cdp_reg_read(D_PERF_LUT_HYBRID);
-	cdp_stat->lut_le_hit = cdp_reg_read(D_PERF_LUT_LE_HIT);
-	cdp_stat->lut_lo_hit = cdp_reg_read(D_PERF_LUT_LO_HIT);
-	cdp_stat->runtime = (uint32_t)(end_time - group->start_time);
+	write_stall = cdp_reg_read(D_PERF_WRITE_STALL);
+    dla_perf_measure("STATS: (%s,%d,%ld)\n",
+        processor->name,
+        group->op_desc->index,
+        write_stall);
 }
+
+//void
+//dla_cdp_stat_data(struct dla_processor *processor,
+//					struct dla_processor_group *group)
+//{
+//	uint64_t end_time = 0;
+//	struct dla_cdp_stat_desc *cdp_stat;
+//
+//	cdp_stat = &processor->stat_data_desc->cdp_stat;
+//
+//	end_time = dla_get_time_us();
+//
+//	cdp_stat->write_stall = cdp_reg_read(D_PERF_WRITE_STALL);
+//	cdp_stat->lut_uflow = cdp_reg_read(D_PERF_LUT_UFLOW);
+//	cdp_stat->lut_oflow = cdp_reg_read(D_PERF_LUT_OFLOW);
+//	cdp_stat->lut_hybrid = cdp_reg_read(D_PERF_LUT_HYBRID);
+//	cdp_stat->lut_le_hit = cdp_reg_read(D_PERF_LUT_LE_HIT);
+//	cdp_stat->lut_lo_hit = cdp_reg_read(D_PERF_LUT_LO_HIT);
+//	cdp_stat->runtime = (uint32_t)(end_time - group->start_time);
+//}
 
 void
 dla_cdp_dump_stat(struct dla_processor *processor)
@@ -121,6 +134,13 @@ dla_cdp_enable(struct dla_processor_group *group)
             group->id,
             group->op_desc->index,
             rdcycle());
+    perf_reg = (map_perf_dma[1] <<
+				SHIFT(CDP_D_PERF_ENABLE_0, DMA_EN)) |
+			(map_perf_lut[1] <<
+				SHIFT(CDP_D_PERF_ENABLE_0, LUT_EN));
+
+	cdp_reg_write(D_PERF_ENABLE, perf_reg);
+
 	if (engine->stat_enable == (uint32_t)1) {
 		perf_reg = (map_perf_dma[1] <<
 				SHIFT(CDP_D_PERF_ENABLE_0, DMA_EN)) |

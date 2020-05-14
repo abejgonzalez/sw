@@ -145,28 +145,47 @@ static const uint8_t map_mean[] = {
 };
 
 #if STAT_ENABLE
+
 void
 dla_conv_stat_data(struct dla_processor *processor,
 					struct dla_processor_group *group)
 {
-	uint64_t end_time = 0;
-	struct dla_conv_stat_desc *conv_stat;
-
-	conv_stat = &processor->stat_data_desc->conv_stat;
-
-	end_time = dla_get_time_us();
-
-	conv_stat->data_read_stall = cdma_reg_read(D_PERF_DAT_READ_STALL);
-	conv_stat->weight_read_stall = cdma_reg_read(D_PERF_WT_READ_STALL);
-	conv_stat->data_read_latency = cdma_reg_read(D_PERF_DAT_READ_LATENCY);
-	conv_stat->weight_read_latency = cdma_reg_read(D_PERF_WT_READ_LATENCY);
-	conv_stat->nan_data_num = cdma_reg_read(D_NAN_INPUT_DATA_NUM);
-	conv_stat->nan_weight_num = cdma_reg_read(D_NAN_INPUT_WEIGHT_NUM);
-	conv_stat->inf_data_num = cdma_reg_read(D_INF_INPUT_DATA_NUM);
-	conv_stat->inf_weight_num = cdma_reg_read(D_INF_INPUT_WEIGHT_NUM);
-	conv_stat->saturation_count = cacc_reg_read(D_OUT_SATURATION);
-	conv_stat->runtime = (uint32_t)(end_time - group->start_time);
+    uint64_t data_read_stall, weight_read_stall, data_read_latency, weight_read_latency;
+    data_read_stall = cdma_reg_read(D_PERF_DAT_READ_STALL);
+    weight_read_stall = cdma_reg_read(D_PERF_WT_READ_STALL);
+    data_read_latency = cdma_reg_read(D_PERF_DAT_READ_LATENCY);
+    weight_read_latency = cdma_reg_read(D_PERF_WT_READ_LATENCY);
+    dla_perf_measure("STATS: (%s,%d,%ld,%ld,%ld,%ld)\n",
+        processor->name,
+        group->op_desc->index,
+        data_read_stall,
+        weight_read_stall,
+        data_read_latency,
+        weight_read_latency);
 }
+
+//void
+//dla_conv_stat_data(struct dla_processor *processor,
+//					struct dla_processor_group *group)
+//{
+//	uint64_t end_time = 0;
+//	struct dla_conv_stat_desc *conv_stat;
+//
+//	conv_stat = &processor->stat_data_desc->conv_stat;
+//
+//	end_time = dla_get_time_us();
+//
+//	conv_stat->data_read_stall = cdma_reg_read(D_PERF_DAT_READ_STALL);
+//	conv_stat->weight_read_stall = cdma_reg_read(D_PERF_WT_READ_STALL);
+//	conv_stat->data_read_latency = cdma_reg_read(D_PERF_DAT_READ_LATENCY);
+//	conv_stat->weight_read_latency = cdma_reg_read(D_PERF_WT_READ_LATENCY);
+//	conv_stat->nan_data_num = cdma_reg_read(D_NAN_INPUT_DATA_NUM);
+//	conv_stat->nan_weight_num = cdma_reg_read(D_NAN_INPUT_WEIGHT_NUM);
+//	conv_stat->inf_data_num = cdma_reg_read(D_INF_INPUT_DATA_NUM);
+//	conv_stat->inf_weight_num = cdma_reg_read(D_INF_INPUT_WEIGHT_NUM);
+//	conv_stat->saturation_count = cacc_reg_read(D_OUT_SATURATION);
+//	conv_stat->runtime = (uint32_t)(end_time - group->start_time);
+//}
 
 void
 dla_conv_dump_stat(struct dla_processor *processor)
@@ -228,6 +247,8 @@ dla_conv_enable(struct dla_processor_group *group)
             group->id,
             group->op_desc->index,
             rdcycle());
+	cdma_reg_write(D_PERF_ENABLE, 1);
+
 	if (engine->stat_enable == (uint32_t)1) {
 		cdma_reg_write(D_PERF_ENABLE, 1);
 		group->start_time = dla_get_time_us();

@@ -84,16 +84,28 @@ void
 dla_pdp_stat_data(struct dla_processor *processor,
 					struct dla_processor_group *group)
 {
-	uint64_t end_time = 0;
-	struct dla_pdp_stat_desc *pdp_stat;
-
-	pdp_stat = &processor->stat_data_desc->pdp_stat;
-
-	end_time = dla_get_time_us();
-
-	pdp_stat->write_stall = pdp_reg_read(D_PERF_WRITE_STALL);
-	pdp_stat->runtime = (uint32_t)(end_time - group->start_time);
+	uint64_t write_stall;
+	write_stall = pdp_reg_read(D_PERF_WRITE_STALL);
+    dla_perf_measure("STATS: (%s,%d,%ld)\n",
+        processor->name,
+        group->op_desc->index,
+        write_stall);
 }
+
+//void
+//dla_pdp_stat_data(struct dla_processor *processor,
+//					struct dla_processor_group *group)
+//{
+//	uint64_t end_time = 0;
+//	struct dla_pdp_stat_desc *pdp_stat;
+//
+//	pdp_stat = &processor->stat_data_desc->pdp_stat;
+//
+//	end_time = dla_get_time_us();
+//
+//	pdp_stat->write_stall = pdp_reg_read(D_PERF_WRITE_STALL);
+//	pdp_stat->runtime = (uint32_t)(end_time - group->start_time);
+//}
 
 void
 dla_pdp_dump_stat(struct dla_processor *processor)
@@ -154,6 +166,9 @@ dla_pdp_enable(struct dla_processor_group *group)
             group->id,
             group->op_desc->index,
             rdcycle());
+	reg = FIELD_ENUM(PDP_D_PERF_ENABLE_0, DMA_EN, ENABLE);
+	pdp_reg_write(D_PERF_ENABLE, reg);
+
 	if (engine->stat_enable == (uint32_t)1) {
 		reg = FIELD_ENUM(PDP_D_PERF_ENABLE_0, DMA_EN, ENABLE);
 		pdp_reg_write(D_PERF_ENABLE, reg);

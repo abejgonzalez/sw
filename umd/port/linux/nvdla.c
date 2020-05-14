@@ -50,6 +50,14 @@
 #include "nvdla_ioctl.h"
 #include "nvdla_os_inf.h"
 
+// RISC-V cycle time
+#define read_csr(reg) ({ unsigned long __tmp; \
+                __asm__ volatile ("csrr %0, " #reg : "=r"(__tmp)); \
+                __tmp; })
+
+#define rdtime() read_csr(time)
+#define rdcycle() read_csr(cycle)
+
 #define NVDLA_DEVICE_NODE "/dev/dri/renderD128"
 
 #define NVDLA_MEM_READ (PROT_READ)
@@ -181,6 +189,7 @@ NvDlaSubmit(void *session_handle, void *device_handle, NvDlaTask *pTasks, NvU32 
     struct nvdla_ioctl_submit_task tasks[num_tasks];
     struct nvdla_submit_args args;
     uint32_t i;
+    uint64_t b4, at;
 
     memset(&args, 0, sizeof(args));
     args.tasks = (uintptr_t)tasks;
@@ -200,11 +209,14 @@ NvDlaSubmit(void *session_handle, void *device_handle, NvDlaTask *pTasks, NvU32 
         }
     }
 
+    b4 = rdcycle();
     if (ioctl(dla_device->fd, DRM_IOCTL_NVDLA_SUBMIT, &args) < 0) {
         printf("%s: Error IOCTL failed (%s)\n",
                         __func__, strerror(errno));
         return NvDlaError_IoctlFailed;
     }
+    at = rdcycle();
+    printf("STAT: IOCTL: %ld,%ld\n", b4, at);
 
     return NvDlaSuccess;
 }

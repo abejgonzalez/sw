@@ -386,12 +386,6 @@ enable_op:
 	LOG_EVENT(group->roi_index, group->id, processor->op_type,
 						LOG_OPERATION_START);
 
-    // TODO: start measure
-    //dla_measure("STAT: Sched %s start: groupid(%d) opidx(%d) cyc(%ld)\n",
-    //        processor->name,
-    //        group->id,
-    //        group->op_desc->index,
-    //        rdcycle());
 	ret = processor->enable(group);
 	if (ret)
 		goto exit;
@@ -409,26 +403,40 @@ dla_submit_operation(struct dla_processor *processor,
 {
 	int32_t err;
 	uint32_t group_id = 0;
+	uint64_t ps, pe, ps1, pe1;
 
 	dla_debug("Enter: %s\n", __func__);
-
-	//dla_measure("Submit [%s]: %ld\n",
-	//        processor->name,
-	//        rdcycle());
 
 	dla_info("    Prepare <%s Unit>. OpIdx:%d ROI:%d OpDepCount:%d\n",
 			processor->name, op_desc->index, roi_index,
 			op_desc->dependency_count);
+
+    ps = rdcycle();
 	err = dla_prepare_operation(processor, op_desc, roi_index, &group_id);
+	pe = rdcycle();
 	if (err)
 		goto exit;
+
+	dla_measure("STATS: (%s,prepare,%d,%d,%ld)\n",
+	        processor->name,
+	        group_id,
+	        op_desc->index,
+	        pe - ps);
 
 	if (!processor->is_ready(processor, &processor->groups[group_id]))
 		goto exit;
 
+	ps1 = rdcycle();
 	err = dla_program_operation(processor, &processor->groups[group_id]);
+	pe1 = rdcycle();
 	if (err)
 		goto exit;
+
+	dla_measure("STATS: (%s,program,%d,%d,%ld)\n",
+	        processor->name,
+	        group_id,
+	        op_desc->index,
+	        pe1 - ps1);
 
 	if (op_desc->dependency_count == 0)
 		err = dla_enable_operation(processor, op_desc);
@@ -508,11 +516,6 @@ dla_update_dependency(struct dla_consumer *consumer,
 	int32_t ret = 0;
 	struct dla_processor *processor;
 	struct dla_engine *engine = dla_get_engine();
-
-	//dla_debug("    DEBUG: ConsIdx:%d EvConsE:%dv%d\n",
-	//        consumer->index,
-	//        event,
-	//        consumer->event);
 
 	if (consumer->index == -1) {
 		goto exit;
@@ -641,6 +644,9 @@ dla_op_completion(struct dla_processor *processor,
             group->op_desc->index,
             rdcycle());
 #if STAT_ENABLE
+    // overridden
+    processor->get_stat_data(processor, group);
+
 	if (engine->stat_enable == (uint32_t)1) {
 		processor->get_stat_data(processor, group);
 
@@ -703,10 +709,6 @@ dla_op_completion(struct dla_processor *processor,
 	dla_info("    %d HWLs done. Totally completed %d layers\n",
 				engine->num_proc_hwl,
 				engine->network->num_operations);
-
-	//dla_measure("Completed [%s] operation: %ld\n",
-	//        processor->name,
-	//        rdcycle());
 
 	/* free operation descriptor from cache */
 	dla_reset_group(group);

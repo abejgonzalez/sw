@@ -391,7 +391,7 @@ static const struct drm_ioctl_desc nvdla_drm_ioctls[] = {
 };
 
 static struct drm_driver nvdla_drm_driver = {
-	.driver_features = DRIVER_GEM | DRIVER_PRIME | DRIVER_RENDER,
+	.driver_features = DRIVER_GEM | DRIVER_RENDER,
 
 	.gem_vm_ops = &drm_gem_cma_vm_ops,
 
@@ -457,6 +457,7 @@ unref:
 void nvdla_drm_remove(struct nvdla_device *nvdla_dev)
 {
 	drm_dev_unregister(nvdla_dev->drm);
-	dma_release_declared_memory(&nvdla_dev->pdev->dev);
+	// removed in upstream linux.
+	// dma_release_declared_memory(&nvdla_dev->pdev->dev);
 	drm_dev_put(nvdla_dev->drm);
 }

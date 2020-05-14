@@ -600,7 +600,7 @@ bool Runtime::submit()
     e = submitInternal();
     e_t = rdcycle();
     // measure submit time
-    NvDlaDebugPrintf("STAT: Runtime cycles: %lu\n", e_t - s_t);
+    NvDlaDebugPrintf("STAT: Runtime cycles: (%lu,%lu) %lu\n", s_t, e_t, e_t - s_t);
     return e == NvDlaSuccess;
 }
 
@@ -614,6 +614,7 @@ NvDlaError Runtime::submitInternal()
     size_t num_emu_instances;
 
     bool ok = true;
+
     NVDLA_UNUSED(ok);
     if ( !m_loaded ) {
         ORIGINATE_ERROR_FAIL(NvDlaError_InvalidState, "exec requires a successful load first");

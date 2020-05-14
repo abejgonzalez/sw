@@ -63,17 +63,32 @@ void
 dla_rubik_stat_data(struct dla_processor *processor,
 					struct dla_processor_group *group)
 {
-	uint64_t end_time = 0;
-	struct dla_rubik_stat_desc *rubik_stat;
+    uint64_t read_stall, write_stall;
+	read_stall = rubik_reg_read(D_PERF_READ_STALL);
+	write_stall = rubik_reg_read(D_PERF_WRITE_STALL);
 
-	rubik_stat = &processor->stat_data_desc->rubik_stat;
-
-	end_time = dla_get_time_us();
-
-	rubik_stat->read_stall = rubik_reg_read(D_PERF_READ_STALL);
-	rubik_stat->write_stall = rubik_reg_read(D_PERF_WRITE_STALL);
-	rubik_stat->runtime = (uint32_t)(end_time - group->start_time);
+    dla_perf_measure("STATS: (%s,%d,%ld,%ld)\n",
+        processor->name,
+        group->op_desc->index,
+        read_stall,
+        write_stall);
 }
+
+//void
+//dla_rubik_stat_data(struct dla_processor *processor,
+//					struct dla_processor_group *group)
+//{
+//	uint64_t end_time = 0;
+//	struct dla_rubik_stat_desc *rubik_stat;
+//
+//	rubik_stat = &processor->stat_data_desc->rubik_stat;
+//
+//	end_time = dla_get_time_us();
+//
+//	rubik_stat->read_stall = rubik_reg_read(D_PERF_READ_STALL);
+//	rubik_stat->write_stall = rubik_reg_read(D_PERF_WRITE_STALL);
+//	rubik_stat->runtime = (uint32_t)(end_time - group->start_time);
+//}
 
 void
 dla_rubik_dump_stat(struct dla_processor *processor)
@@ -110,6 +125,8 @@ dla_rubik_enable(struct dla_processor_group *group)
             group->id,
             group->op_desc->index,
             rdcycle());
+	rubik_reg_write(D_PERF_ENABLE, 1);
+
 	if (engine->stat_enable == (uint32_t)1) {
 		rubik_reg_write(D_PERF_ENABLE, 1);
 		group->start_time = dla_get_time_us();
